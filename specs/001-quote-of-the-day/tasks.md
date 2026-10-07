@@ -160,7 +160,8 @@ the main toggle updates.
 
 - [X] T036 Run `npm run format`, then `npm run lint`, `npm run format:check`, and `npm test`; fix every warning/failure until all pass and coverage reports ≥ 80% lines for `src/**/*.js`
 - [X] T037 [P] Create `README.md` at repo root: one-paragraph description, `npm install`, `npm run serve` (note `file://` is unsupported, research.md R-1), `npm test` / `npm run lint` / `npm run format:check`, and a link to `specs/001-quote-of-the-day/`
-- [ ] T038 Run every manual scenario in `specs/001-quote-of-the-day/quickstart.md` (1–13) in a real browser; for any failure, fix the code with a regression test first (Principle II) and re-run
+- [x] T038 Run every manual scenario in `specs/001-quote-of-the-day/quickstart.md` (1–13) in a real browser; for any failure, fix the code with a regression test first (Principle II) and re-run
+  - Checked in Chrome on 2026-10-07: new quote, favorite/unfavorite, reload keeps favorites, Remove from list, empty-list message, 360 px width (no horizontal scroll), incognito window. Screenshots in `docs/`. Not checked: VoiceOver, manually corrupted storage, Safari.
 
 ---
 
