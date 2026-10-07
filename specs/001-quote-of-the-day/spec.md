@@ -9,6 +9,14 @@
 **Input**: User description: "A quote-of-the-day page: one random quote from a built-in list, a
 \"New quote\" button, and favoriting that persists across reloads."
 
+## Clarifications
+
+### Session 2026-10-07
+
+- Q: Should visitors be able to see all their favorited quotes, and how? → A: Yes. A simple
+  list of all favorited quotes appears below the current quote, and each entry can be
+  unfavorited from the list (replaces the earlier "favorites list out of scope" assumption).
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - See a random quote (Priority: P1)
@@ -84,6 +92,36 @@ confirm it is no longer marked.
 
 ---
 
+### User Story 4 - See and manage all favorites (Priority: P4)
+
+Below the current quote, the visitor sees a simple list of every quote they have favorited,
+each with its text and author. They can unfavorite any quote directly from this list, without
+having to bring it back as the current quote first.
+
+**Why this priority**: Favoriting is only worth much if the visitor can find their favorites
+again. It builds on Story 3, which must exist first.
+
+**Independent Test**: Favorite three different quotes, confirm all three appear in the list below
+the current quote, reload and confirm they are still listed, then unfavorite one from the list
+and confirm it disappears and stays gone after reload.
+
+**Acceptance Scenarios**:
+
+1. **Given** the visitor has no favorites, **When** the page is shown, **Then** the favorites
+   area below the current quote shows a short message saying there are no favorites yet.
+2. **Given** the visitor favorites a quote, **When** the favorite control is activated, **Then**
+   that quote immediately appears at the top of the favorites list.
+3. **Given** several quotes are favorited, **When** the page is reloaded, **Then** the list shows
+   all of them, most recently favorited first.
+4. **Given** a quote is in the favorites list, **When** the visitor activates that entry's
+   unfavorite control, **Then** the quote is immediately removed from the list and stays removed
+   after reload.
+5. **Given** the quote being displayed is also in the list, **When** it is unfavorited from either
+   the list or the main favorite control, **Then** both places update immediately to show it is
+   no longer a favorite.
+
+---
+
 ### Edge Cases
 
 - **Collection of one quote**: "New quote" keeps showing the only quote and the page does not
@@ -98,7 +136,13 @@ confirm it is no longer marked.
 - **Rapid repeated presses** of "New quote" or the favorite control: every press is handled in
   order and the display always matches the final state.
 - **Very long quote text or author name**: displayed in full and readable on narrow (phone-width)
-  and wide screens without overflowing the page.
+  and wide screens without overflowing the page, both as the current quote and in the favorites
+  list.
+- **Every quote in the collection is favorited**: the list shows all of them and the page stays
+  usable; the current quote remains visible above the list.
+- **Last favorite removed from the list**: the list is replaced by the "no favorites yet" message.
+- **Keyboard focus after unfavoriting from the list**: focus moves to the next entry (or the
+  previous one, or the list's empty message if none remain) instead of being lost.
 
 ## Requirements *(mandatory)*
 
@@ -131,13 +175,25 @@ confirm it is no longer marked.
   the favorite control MUST expose its current on/off state to assistive technologies.
 - **FR-012**: The page MUST be usable and readable on screens from phone width (360 px) to
   desktop width without horizontal scrolling.
+- **FR-013**: The page MUST show, below the current quote, a list of all favorited quotes, each
+  with its text and author (or "Unknown"), ordered most recently favorited first.
+- **FR-014**: Each entry in the favorites list MUST have its own unfavorite control that removes
+  that quote from favorites; the removal MUST persist as described in FR-008.
+- **FR-015**: The favorites list and the favorite control on the current quote MUST always agree:
+  a change made in either place MUST be reflected in the other immediately, without reloading.
+- **FR-016**: When there are no favorites, the favorites area MUST show a short message stating
+  that there are no favorites yet.
+- **FR-017**: Each unfavorite control in the list MUST have an accessible name that identifies
+  which quote it removes, and keyboard focus MUST stay within the list (next entry, previous
+  entry, or the empty message) after an entry is removed.
 
 ### Key Entities
 
 - **Quote**: One entry in the built-in collection. Attributes: a stable identifier, the quote
   text, and an optional author name.
 - **Favorites**: The visitor's set of favorited quotes, kept on their own device and browser.
-  Holds references to Quote identifiers; a quote is either in the set or not.
+  Holds references to Quote identifiers, each with the order in which it was favorited (used to
+  list the most recent first); a quote is either in the set or not, never twice.
 
 ## Success Criteria *(mandatory)*
 
@@ -154,8 +210,12 @@ confirm it is no longer marked.
 - **SC-005**: 100% of favorite and unfavorite actions are still reflected after reloading the page
   on the same device and browser.
 - **SC-006**: A first-time visitor can favorite a quote within 10 seconds without any instructions.
-- **SC-007**: Every action on the page (getting a new quote, favoriting, unfavoriting) can be
-  completed using only the keyboard.
+- **SC-007**: Every action on the page (getting a new quote, favoriting, unfavoriting from the
+  current quote or the favorites list) can be completed using only the keyboard.
+- **SC-008**: In 100% of cases, the favorites list after a reload contains exactly the quotes that
+  were favorited and not since unfavorited, in most-recent-first order.
+- **SC-009**: A visitor can find and unfavorite a specific favorited quote from the list within
+  10 seconds, with up to 20 favorites listed.
 
 ## Assumptions
 
@@ -165,9 +225,10 @@ confirm it is no longer marked.
   needs no network service, sign-in, or external quote source.
 - **Favorites are local**: Favorites belong to the visitor's current device and browser; they are
   not synced across devices or browsers and are not shared between visitors. No accounts.
-- **Favorites list is out of scope for v1**: The visitor sees favorite status on the displayed
-  quote only; browsing a list of all favorites, filtering to favorites, and sharing quotes are not
-  part of this feature.
+- **Favorites list is simple**: The list below the current quote shows every favorite and allows
+  unfavoriting only. Selecting an entry does not make it the current quote, and searching,
+  filtering, sorting options, paging, reordering, and sharing are out of scope for v1. With a
+  built-in collection of modest size, the full list is shown without paging.
 - **No content management**: Visitors cannot add, edit, or delete quotes; changing the collection
   is a developer task.
 - **Single language**: Quotes and interface text are in English for v1.

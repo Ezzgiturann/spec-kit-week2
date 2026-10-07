@@ -35,5 +35,5 @@
 - Persistence is described as "on the same device and browser" without naming a storage
   mechanism; the mechanism is a planning decision.
 - Judgment calls recorded in Assumptions rather than as clarification markers: random-per-open
-  (not fixed per day) and no favorites list in v1. Revisit with `/speckit-clarify` if either is
-  wrong.
+  (not fixed per day). The earlier "no favorites list in v1" call was reversed in the
+  2026-10-07 clarification: a simple favorites list is now in scope (User Story 4, FR-013 to FR-017).
