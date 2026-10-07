@@ -1,8 +1,14 @@
-import { describe, it } from 'node:test';
+import { afterEach, beforeEach, describe, it, mock } from 'node:test';
 import assert from 'node:assert/strict';
 import { STORAGE_KEY, parseFavorites, createFavorites } from '../../src/favorites.js';
 import { createStorage } from '../../src/storage.js';
 import { createFakeBackend } from '../helpers.js';
+
+// Failures are logged with console.warn; silence and record them for every test.
+beforeEach(() => mock.method(console, 'warn', () => {}));
+afterEach(() => mock.restoreAll());
+
+const warnings = () => console.warn.mock.calls.map((call) => call.arguments.join(' '));
 
 const KNOWN = new Set(['q001', 'q002', 'q003']);
 
@@ -116,5 +122,19 @@ describe('createFavorites', () => {
     favorites.toggle('q001');
     assert.equal(favorites.isPersistent(), false);
     assert.deepEqual(favorites.ids(), ['q001']);
+  });
+});
+
+describe('parseFavorites warnings', () => {
+  it('warns once with the storage key when the saved value is not JSON', () => {
+    parseFavorites('not json', KNOWN);
+    assert.equal(warnings().length, 1);
+    assert.match(warnings()[0], /qotd\.favorites\.v1/);
+  });
+
+  it('logs nothing for missing or valid saved favorites', () => {
+    parseFavorites(null, KNOWN);
+    parseFavorites('{"version":1,"ids":["q001"]}', KNOWN);
+    assert.deepEqual(warnings(), []);
   });
 });

@@ -1,6 +1,7 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { pickRandom, pickDifferent } from '../../src/random.js';
+import { seededRng } from '../helpers.js';
 
 const items = [{ id: 'a' }, { id: 'b' }, { id: 'c' }, { id: 'd' }];
 
@@ -30,8 +31,9 @@ describe('pickRandom', () => {
     assert.throws(() => pickRandom([], () => 0), RangeError);
   });
 
-  it('defaults to Math.random', () => {
-    assert.ok(items.includes(pickRandom(items)));
+  it('defaults to Math.random', (t) => {
+    t.mock.method(Math, 'random', () => 0.999);
+    assert.equal(pickRandom(items), items[3]);
   });
 });
 
@@ -55,7 +57,13 @@ describe('pickDifferent', () => {
   });
 
   it('never returns the current item', () => {
-    for (let i = 0; i < 1000; i++) assert.notEqual(pickDifferent(abc, 'b').id, 'b');
+    const rng = seededRng(42);
+    for (let i = 0; i < 1000; i++) assert.notEqual(pickDifferent(abc, 'b', rng).id, 'b');
+  });
+
+  it('defaults to Math.random', (t) => {
+    t.mock.method(Math, 'random', () => 0);
+    assert.equal(pickDifferent(abc, 'a'), b);
   });
 
   it('returns the only item when there is just one', () => {

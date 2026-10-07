@@ -17,6 +17,18 @@ export function sequenceRng(values) {
   return () => values[index++ % values.length];
 }
 
+/** A deterministic rng in [0, 1) (mulberry32), so "many random draws" tests repeat exactly. */
+export function seededRng(seed) {
+  let state = seed >>> 0;
+  return () => {
+    state = (state + 0x6d2b79f5) >>> 0;
+    let t = state;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
 /**
  * A stand-in for window.localStorage. `throwOnAccess` makes getBackend() throw (like a blocked
  * localStorage getter); `throwOnWrite` makes setItem throw and can be flipped mid-test.

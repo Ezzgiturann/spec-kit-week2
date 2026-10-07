@@ -13,7 +13,8 @@ export function parseFavorites(raw, knownIds) {
   let parsed;
   try {
     parsed = JSON.parse(raw);
-  } catch {
+  } catch (error) {
+    console.warn(`[qotd] ignoring unreadable saved favorites in "${STORAGE_KEY}":`, error);
     return [];
   }
   if (parsed === null || typeof parsed !== 'object') return [];

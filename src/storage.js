@@ -26,7 +26,8 @@ export function createStorage(getBackend = () => globalThis.localStorage) {
       if (backend === null) return null;
       try {
         return backend.getItem(key);
-      } catch {
+      } catch (error) {
+        console.warn(`[qotd] storage read failed for "${key}"; treating it as empty:`, error);
         return null;
       }
     },
@@ -36,9 +37,13 @@ export function createStorage(getBackend = () => globalThis.localStorage) {
         try {
           backend.setItem(key, value);
           return true;
-        } catch {
+        } catch (error) {
           // Quota or security error: stop writing to the backend for the rest of the visit,
           // but keep reading values it already holds.
+          console.warn(
+            `[qotd] storage write failed for "${key}"; keeping values in memory for this visit:`,
+            error,
+          );
           persistent = false;
         }
       }
@@ -54,7 +59,11 @@ function probe(getBackend) {
     backend.setItem(PROBE_KEY, PROBE_KEY);
     backend.removeItem(PROBE_KEY);
     return backend;
-  } catch {
+  } catch (error) {
+    console.warn(
+      `[qotd] storage unavailable (probe of "${PROBE_KEY}" failed); using memory for this visit:`,
+      error,
+    );
     return null;
   }
 }

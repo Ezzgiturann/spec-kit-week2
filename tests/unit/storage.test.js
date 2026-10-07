@@ -1,7 +1,13 @@
-import { describe, it } from 'node:test';
+import { afterEach, beforeEach, describe, it, mock } from 'node:test';
 import assert from 'node:assert/strict';
 import { createStorage } from '../../src/storage.js';
 import { createFakeBackend } from '../helpers.js';
+
+// Failures are logged with console.warn; silence and record them for every test.
+beforeEach(() => mock.method(console, 'warn', () => {}));
+afterEach(() => mock.restoreAll());
+
+const warnings = () => console.warn.mock.calls.map((call) => call.arguments.join(' '));
 
 describe('createStorage', () => {
   it('is persistent with a working backend and round-trips values', () => {
@@ -55,5 +61,46 @@ describe('createStorage', () => {
       removeItem() {},
     }));
     assert.equal(storage.read('k'), null);
+  });
+});
+
+describe('createStorage warnings', () => {
+  const KEY = 'qotd.favorites.v1';
+
+  it('logs nothing when storage works', () => {
+    const storage = createStorage(createFakeBackend().getBackend);
+    storage.write(KEY, 'v');
+    storage.read(KEY);
+    assert.deepEqual(warnings(), []);
+  });
+
+  it('warns once with the probe key when storage is unavailable', () => {
+    createStorage(createFakeBackend({ throwOnAccess: true }).getBackend);
+    assert.equal(warnings().length, 1);
+    assert.match(warnings()[0], /qotd\.__probe__/);
+  });
+
+  it('warns once with the key when a write fails', () => {
+    const backend = createFakeBackend();
+    const storage = createStorage(backend.getBackend);
+    backend.throwOnWrite = true;
+    storage.write(KEY, 'v');
+    assert.equal(warnings().length, 1);
+    assert.match(warnings()[0], /qotd\.favorites\.v1/);
+    assert.match(warnings()[0], /QuotaExceededError/);
+  });
+
+  it('warns once with the key when a read fails', () => {
+    const storage = createStorage(() => ({
+      getItem() {
+        throw new Error('boom');
+      },
+      setItem() {},
+      removeItem() {},
+    }));
+    storage.read(KEY);
+    assert.equal(warnings().length, 1);
+    assert.match(warnings()[0], /qotd\.favorites\.v1/);
+    assert.match(warnings()[0], /boom/);
   });
 });

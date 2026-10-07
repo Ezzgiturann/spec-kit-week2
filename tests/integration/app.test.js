@@ -1,6 +1,10 @@
-import { describe, it } from 'node:test';
+import { afterEach, beforeEach, describe, it, mock } from 'node:test';
 import assert from 'node:assert/strict';
-import { createFakeBackend, mountTestApp, sequenceRng } from '../helpers.js';
+import { createFakeBackend, mountTestApp, seededRng, sequenceRng } from '../helpers.js';
+
+// Storage-failure scenarios log warnings by design; keep test output clean.
+beforeEach(() => mock.method(console, 'warn', () => {}));
+afterEach(() => mock.restoreAll());
 
 const FIXTURE = [
   { id: 'q001', text: 'First quote.', author: 'Ada' },
@@ -67,7 +71,7 @@ describe('US2: new quote', () => {
   });
 
   it('never shows the same quote twice in a row over 100 presses', () => {
-    const { document } = mountTestApp({ rng: Math.random });
+    const { document } = mountTestApp({ rng: seededRng(42) });
     let previous = quoteText(document);
     for (let i = 0; i < 100; i++) {
       newQuoteButton(document).click();
@@ -181,8 +185,13 @@ describe('US4: favorites list', () => {
   const list = (document) => document.querySelector('[data-testid="favorites-list"]');
   const empty = (document) => document.querySelector('[data-testid="favorites-empty"]');
   const entries = (document) => [...list(document).querySelectorAll('li')];
-  const entryTexts = (document) =>
-    entries(document).map((li) => li.querySelector('.favorite-text').textContent);
+  // An entry reads "<text> — <author|Unknown>" followed by its Remove button (contracts/ui.md).
+  const entryLabels = (document) =>
+    entries(document).map((li) => {
+      const label = li.cloneNode(true);
+      label.querySelector('button').remove();
+      return label.textContent;
+    });
   const removeButtons = (document) => entries(document).map((li) => li.querySelector('button'));
 
   /** Mount the app and favorite the fixture quotes at `positions`, in that order. */
@@ -207,18 +216,16 @@ describe('US4: favorites list', () => {
     favoriteToggle(document).click();
     assert.equal(list(document).hidden, false);
     assert.equal(empty(document).hidden, true);
-    assert.deepEqual(entryTexts(document), ['First quote.', 'Second quote.']);
-    assert.equal(entries(document)[0].querySelector('.favorite-author').textContent, '— Ada');
-    assert.equal(entries(document)[1].querySelector('.favorite-author').textContent, '— Unknown');
+    assert.deepEqual(entryLabels(document), ['First quote. — Ada', 'Second quote. — Unknown']);
   });
 
   it('lists favorites newest first after a reload', () => {
     const { backend } = favoriteInOrder([0, 2, 1]);
     const { document } = mountTestApp({ quotes: FIXTURE, backend });
-    assert.deepEqual(entryTexts(document), [
-      'Second quote.',
-      'Has <b>bold</b> markup.',
-      'First quote.',
+    assert.deepEqual(entryLabels(document), [
+      'Second quote. — Unknown',
+      'Has <b>bold</b> markup. — Bob',
+      'First quote. — Ada',
     ]);
   });
 
@@ -250,7 +257,7 @@ describe('US4: favorites list', () => {
     const { document, backend } = favoriteInOrder([0, 1]);
     removeButtons(document)[0].click();
     const reloaded = mountTestApp({ quotes: FIXTURE, backend });
-    assert.deepEqual(entryTexts(reloaded.document), ['First quote.']);
+    assert.deepEqual(entryLabels(reloaded.document), ['First quote. — Ada']);
   });
 
   it('moves focus to the next, then previous, then the empty message', () => {
@@ -273,6 +280,6 @@ describe('US4: favorites list', () => {
     const quotes = [...FIXTURE, { id: 'q004', text: longText, author: null }];
     const { document, favorites } = mountTestApp({ quotes });
     favorites.toggle('q004');
-    assert.equal(entryTexts(document)[0], longText);
+    assert.equal(entryLabels(document)[0], `${longText} — Unknown`);
   });
 });
