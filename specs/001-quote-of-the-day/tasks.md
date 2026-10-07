@@ -247,3 +247,12 @@ Each increment keeps all previous tests green.
 - Verify new tests fail before implementing; commit after each task or logical group
 - Never set quote/author text with `innerHTML` (research.md R-7)
 - Element names, labels and `data-testid` values come from contracts/ui.md — do not invent new ones
+
+---
+
+## Phase 8: Convergence
+
+- [ ] T039 CRITICAL: In `src/storage.js` (`probe`, `read`, `write`) and `src/favorites.js` (`parseFavorites` JSON parse), stop discarding caught errors: bind the error and call `console.warn` with context (operation, storage key, error message), e.g. `console.warn('[qotd] storage write failed for qotd.favorites.v1; keeping favorites in memory:', error)`; visitor-facing behavior and the never-throw contract stay unchanged; first add tests in `tests/unit/storage.test.js` and `tests/unit/favorites.test.js` that use `mock.method(console, 'warn')` from `node:test` to assert one warning with the key in its message per failure, and that no warning is logged on the happy path, per Constitution V (contradicts)
+- [ ] T040 CRITICAL: Remove unseeded randomness from tests: add `seededRng(seed)` (mulberry32) to `tests/helpers.js`; use `seededRng(42)` instead of `Math.random` in the "never shows the same quote twice in a row over 100 presses" test in `tests/integration/app.test.js` and the "never returns the current item" test in `tests/unit/random.test.js`; replace "defaults to Math.random" with a test that stubs `Math.random` via `mock.method(Math, 'random', () => 0.999)` and asserts the last item is returned, per Constitution III (contradicts)
+- [ ] T041 In `tests/integration/app.test.js` (`describe('US4: favorites list')`), stop selecting by the CSS classes `.favorite-text` / `.favorite-author`: derive each entry's text and author from the `li` text content excluding its Remove button (format `<text> — <author|Unknown>` per contracts/ui.md "List entry"), so styling changes cannot break tests, per plan: contracts/ui.md and Constitution III (contradicts)
+- [ ] T042 Refactor `mountApp` in `src/view.js` (currently 133 lines) below ~40 lines without behavior change: extract `buildLayout(el)` (returns the heading, notice, figure parts, controls and favorites section elements) and module-level `createFavoriteEntry(el, quote)`, keeping the render/event functions small; all existing tests must stay green with no test edits, per Constitution: Code Quality Standards (partial)
