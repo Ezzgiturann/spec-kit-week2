@@ -1,0 +1,204 @@
+:root {
+  --color-bg: #fbfaf7;
+  --color-surface: #ffffff;
+  --color-text: #1f1d1a;
+  --color-muted: #5f5a52;
+  --color-border: #ddd8cf;
+  --color-accent: #9a4a07;
+  --color-accent-contrast: #ffffff;
+  --color-focus: #1a5fb4;
+  --color-notice-bg: #fff4d6;
+  --color-notice-text: #5c4300;
+  --radius: 8px;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg: #161513;
+    --color-surface: #211f1c;
+    --color-text: #f1eee8;
+    --color-muted: #b5aea3;
+    --color-border: #3a3631;
+    --color-accent: #f0a35c;
+    --color-accent-contrast: #1b1206;
+    --color-focus: #8cb8ff;
+    --color-notice-bg: #3a2f12;
+    --color-notice-text: #ffe2a3;
+    color-scheme: dark;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family:
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    Roboto,
+    sans-serif;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+#app {
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: 2rem 16px 3rem;
+}
+
+h1 {
+  font-size: 1.5rem;
+  margin: 0 0 1.5rem;
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.noscript {
+  max-width: 40rem;
+  margin: 2rem auto;
+  padding: 0 16px;
+}
+
+/* Current quote */
+figure {
+  margin: 0;
+  padding: 1.5rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+}
+
+blockquote {
+  margin: 0;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 1.375rem;
+  line-height: 1.45;
+}
+
+figcaption {
+  margin-top: 0.75rem;
+  color: var(--color-muted);
+}
+
+/* Buttons */
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+button {
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0.5rem 1rem;
+  font: inherit;
+  color: var(--color-text);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+
+button:hover {
+  border-color: var(--color-accent);
+}
+
+button:active {
+  transform: translateY(1px);
+}
+
+/* Favorite toggle */
+.favorite-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.favorite-toggle .icon {
+  font-size: 1.2em;
+  line-height: 1;
+}
+
+.favorite-toggle[aria-pressed='true'] {
+  color: var(--color-accent-contrast);
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+/* Storage notice */
+.notice {
+  margin: 0 0 1rem;
+  padding: 0.75rem 1rem;
+  color: var(--color-notice-text);
+  background: var(--color-notice-bg);
+  border-radius: var(--radius);
+}
+
+/* Favorites list */
+.favorites {
+  margin-top: 2.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--color-border);
+}
+
+h2 {
+  font-size: 1.125rem;
+  margin: 0 0 1rem;
+}
+
+.favorites ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.favorites li {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: start;
+  gap: 0.25rem 1rem;
+  padding: 0.75rem 1rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+}
+
+.favorite-text {
+  grid-column: 1;
+}
+
+.favorite-author {
+  grid-column: 1;
+  color: var(--color-muted);
+  font-size: 0.9375rem;
+}
+
+.favorites li button {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+}
+
+.favorites-empty {
+  margin: 0;
+  color: var(--color-muted);
+}
+
+/* Keep the hidden attribute effective even where a rule above sets display. */
+[hidden] {
+  display: none !important;
+}
