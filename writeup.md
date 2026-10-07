@@ -67,5 +67,5 @@ Without the refinement, none of this would have been built.
 
 ## 4. What I learned
 
-<!-- Write this section yourself, in 3–4 sentences: where SDD felt like overhead and where it paid off. (Course policy: no AI for reflections.) -->
+The six documents written before any code felt long, but they paid off. Because I caught the missing favorites list at the spec stage, I did not have to revise the code later, which would have made the process take longer. During planning the agent marked every check as passing, yet converge still found four issues; I think this kind of thing can happen in code. What matters is moving forward step by step with a modular structure: if the architecture is set up properly, it is easier to see errors and fix them.
 
